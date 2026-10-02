@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUSTAM QURILISH - 3D Loyihalar Portfoliosi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap');
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #0b0f19;
+            color: white;
+            user-select: none;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .interactive-ui {
+            pointer-events: auto;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 1.25rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .project-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .project-card:hover, .project-card.active {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #090d16;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease-out;
+        }
+
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #f59e0b;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="loading" class="loading-screen">
+    <div class="loader mb-4"></div>
+    <h2 class="text-2xl font-black tracking-widest text-amber-500">RUSTAM QURILISH</h2>
+    <p class="text-xs text-gray-400 mt-2 tracking-wider">3D LOYIHALAR YUKLANMOQDA...</p>
+</div>
+
+<div id="canvas-container"></div>
+
+<div id="ui-layer" class="p-4 sm:p-6 md:p-8">
+    <!-- Header: FAQAT BRANDING (Menyular olib tashlangan) -->
+    <header class="w-full max-w-7xl mx-auto flex justify-between items-center interactive-ui">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-gradient-to-tr from-amber-600 to-amber-400 rounded-xl flex items-center justify-center font-black text-2xl text-slate-950 shadow-lg shadow-amber-500/20">
+                R
+            </div>
+            <div>
+                <h1 class="text-xl sm:text-2xl font-black tracking-wider text-white">RUSTAM <span class="text-amber-500 font-light">QURILISH</span></h1>
+                <p class="text-[10px] text-amber-400/80 font-bold uppercase tracking-widest">3D Loyihalar Portfoliosi</p>
+            </div>
+        </div>
+
+        <div class="hidden sm:flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-xl border border-white/10 text-xs text-gray-300">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>4 ta Bino Interaktiv 3D Rejimida</span>
+        </div>
+    </header>
+
+    <!-- Bottom Projects Bar (4 Ta Bino Tanlovi) -->
+    <main class="w-full max-w-7xl mx-auto my-auto flex flex-col justify-end interactive-ui pt-6">
+        <!-- Active Project Details Header -->
+        <div id="active-project-info" class="glass-panel p-5 mb-4 max-w-xl transition-all duration-500">
+            <div class="flex items-center gap-2 text-amber-500 text-xs font-bold uppercase tracking-wider mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h5m0 0v-5a2 2 0 00-2-2h-1a2 2 0 00-2 2v5" />
+                </svg>
+                <span id="proj-category">A+ Toifasidagi Bino</span>
+            </div>
+            <h2 id="proj-title" class="text-2xl font-black text-white">"Rustam Tower" Biznes Markazi</h2>
+            <p id="proj-desc" class="text-xs text-gray-300 mt-2 leading-relaxed">
+                Toshkent markazidagi 45 qavatli eng zamonaviy biznes kompleksi. Panoramali oynalar, smart boshqaruv tizimi va vertikal bog'lar.
+            </p>
+            <div class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-white/10 text-center">
+                <div>
+                    <p class="text-[10px] text-gray-400 uppercase">Qavatlar</p>
+                    <p id="spec-floors" class="text-sm font-bold text-amber-400">45 qavat</p>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-400 uppercase">Umumiy Maydon</p>
+                    <p id="spec-area" class="text-sm font-bold text-amber-400">85,000 m²</p>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-400 uppercase">Holati</p>
+                    <p id="spec-status" class="text-sm font-bold text-emerald-400">Bitkazilgan</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 Building Selector Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <!-- Project 1 -->
+            <div id="card-tower" class="project-card active glass-panel p-3 sm:p-4 rounded-xl cursor-pointer" onclick="selectBuilding('tower')">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">1-BINO</span>
+                    <span class="text-[10px] text-gray-400">45 Qavat</span>
+                </div>
+                <h3 class="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">Rustam Tower</h3>
+                <p class="text-[10px] text-gray-400 mt-1 truncate">Biznes Markazi</p>
+            </div>
+
+            <!-- Project 2 -->
+            <div id="card-residential" class="project-card glass-panel p-3 sm:p-4 rounded-xl cursor-pointer" onclick="selectBuilding('residential')">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">2-BINO</span>
+                    <span class="text-[10px] text-gray-400">32 Qavat</span>
+                </div>
+                <h3 class="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">Yashil Makon</h3>
+                <p class="text-[10px] text-gray-400 mt-1 truncate">Turar-joy Majmuasi</p>
+            </div>
+
+            <!-- Project 3 -->
+            <div id="card-mall" class="project-card glass-panel p-3 sm:p-4 rounded-xl cursor-pointer" onclick="selectBuilding('mall')">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">3-BINO</span>
+                    <span class="text-[10px] text-gray-400">5 Qavat</span>
+                </div>
+                <h3 class="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">Mega Plaza</h3>
+                <p class="text-[10px] text-gray-400 mt-1 truncate">Savdo & Ko'ngilochar</p>
+            </div>
+
+            <!-- Project 4 -->
+            <div id="card-villas" class="project-card glass-panel p-3 sm:p-4 rounded-xl cursor-pointer" onclick="selectBuilding('villas')">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">4-BINO</span>
+                    <span class="text-[10px] text-gray-400">3 Qavat</span>
+                </div>
+                <h3 class="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">Grand Eco Residence</h3>
+                <p class="text-[10px] text-gray-400 mt-1 truncate">Premium Kottedjlar</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Tips -->
+    <footer class="w-full max-w-7xl mx-auto flex justify-between items-center interactive-ui pt-3">
+        <p class="text-[11px] text-gray-400">&copy; 2026 Rustam Qurilish. Barcha huquqlar himoyalangan.</p>
+        <div class="flex items-center gap-2 text-[11px] text-amber-400 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-white/10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+            </svg>
+            <span>Sichqoncha bilan 3D binolarni aylantirib ko'ring</span>
+        </div>
+    </footer>
+</div>
+
+<script>
+    const projectsData = {
+        tower: {
+            title: '"Rustam Tower" Biznes Markazi',
+            category: 'A+ Toifasidagi Bino',
+            desc: 'Toshkent markazidagi 45 qavatli eng zamonaviy biznes kompleksi. Panoramali oynalar, smart boshqaruv tizimi va vertikal bog\'lar.',
+            floors: '45 qavat',
+            area: '85,000 m²',
+            status: 'Bitkazilgan',
+            cameraPos: { x: 0, y: 35, z: 45 },
+            lookAt: { x: 0, y: 22, z: -10 }
+        },
+        residential: {
+            title: '"Yashil Makon" Turar-joyi',
+            category: 'Ekologik Egizak Minoralar',
+            desc: 'Ekologik toza hududda qurilgan 32 qavatli egizak minoralar. Panoramali osmon ko\'prigi va energiya tejamkor xonadonlar.',
+            floors: '32 qavat',
+            area: '120,000 m²',
+            status: 'Bitkazilgan',
+            cameraPos: { x: -35, y: 30, z: 20 },
+            lookAt: { x: -50, y: 18, z: -30 }
+        },
+        mall: {
+            title: '"Mega Plaza" Savdo Majmuasi',
+            category: 'Savdo va Ko\'ngilochar Markaz',
+            desc: 'Keng ko\'lamli shisha atroflar, 200+ brend do\'konlari, gipermarket va zamonaviy kinoteatrlarga ega eng katta savdo markazlaridan biri.',
+            floors: '5 qavat',
+            area: '65,000 m²',
+            status: 'Bitkazilgan',
+            cameraPos: { x: 35, y: 20, z: 20 },
+            lookAt: { x: 45, y: 8, z: -25 }
+        },
+        villas: {
+            title: '"Grand Eco Residence" Majmuasi',
+            category: 'Premium Klas Kottedjlar',
+            desc: 'Shahar shovqinidan xoli, xususiy hovuz va aqlli uy texnologiyasiga ega kottedj va villalardan iborat hashamatli hudud.',
+            floors: '3 qavat',
+            area: '40,000 m²',
+            status: 'Bitkazilgan',
+            cameraPos: { x: 0, y: 18, z: 70 },
+            lookAt: { x: 0, y: 4, z: 30 }
+        }
+    };
+
+    let activeBuilding = 'tower';
+    let targetCameraPos = { ...projectsData.tower.cameraPos };
+    let targetLookAt = { ...projectsData.tower.lookAt };
+    let currentLookAt = { ...projectsData.tower.lookAt };
+
+    let mouseX = 0, mouseY = 0;
+
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0b0f19);
+    scene.fog = new THREE.FogExp2(0x0b0f19, 0.008);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(targetCameraPos.x, targetCameraPos.y, targetCameraPos.z);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfff3e0, 1.2);
+    sunLight.position.set(60, 80, 40);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.near = 0.5;
+    sunLight.shadow.camera.far = 250;
+    scene.add(sunLight);
+
+    const blueRimLight = new THREE.DirectionalLight(0x38bdf8, 0.6);
+    blueRimLight.position.set(-60, 40, -40);
+    scene.add(blueRimLight);
+
+    const mainGroup = new THREE.Group();
+    scene.add(mainGroup);
+
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.7 });
+    const darkGlassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.2, metalness: 0.8, transparent: true, opacity: 0.85 });
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.6 });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.3, metalness: 0.8 });
+    const accentMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.5 });
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.7 });
+
+    // Ground
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    mainGroup.add(ground);
+
+    // Helper box function
+    function createBox(w, h, d, mat, x, y, z, castShadow = true) {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+        mesh.position.set(x, y + h / 2, z);
+        if (castShadow) {
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+        }
+        mainGroup.add(mesh);
+        return mesh;
+    }
+
+    // 1-BINO: Rustam Tower (Center: 0, 0, -10)
+    createBox(16, 2, 16, concreteMat, 0, 0, -10);
+    createBox(14, 44, 14, darkGlassMat, 0, 2, -10);
+    // Metallic frame pillars
+    for (let i = -1; i <= 1; i += 2) {
+        for (let j = -1; j <= 1; j += 2) {
+            createBox(1, 46, 1, steelMat, i * 7.1, 0, -10 + j * 7.1);
+        }
+    }
+    // Decorative Spire Antenna on Roof
+    const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.8, 12), accentMat);
+    spire.position.set(0, 52, -10);
+    mainGroup.add(spire);
+
+
+    // 2-BINO: Yashil Makon Twin Towers (Center: -50, 0, -30)
+    // Tower A
+    createBox(12, 32, 12, concreteMat, -57, 0, -30);
+    createBox(12.2, 28, 12.2, glassMat, -57, 2, -30);
+    // Tower B
+    createBox(12, 32, 12, concreteMat, -43, 0, -30);
+    createBox(12.2, 28, 12.2, glassMat, -43, 2, -30);
+    // Skybridge connecting twin towers
+    createBox(18, 3, 6, steelMat, -50, 20, -30);
+    createBox(18, 2.8, 5.8, glassMat, -50, 20.1, -30);
+
+
+    // 3-BINO: Mega Plaza Mall (Center: 45, 0, -25)
+    createBox(32, 8, 24, concreteMat, 45, 0, -25);
+    // Atrium Glass Roof entrance
+    createBox(20, 10, 8, glassMat, 45, 0, -14);
+    createBox(32.4, 1, 24.4, accentMat, 45, 8, -25); // Roof rim accent
+
+
+    // 4-BINO: Grand Eco Residence Villas (Center: 0, 0, 30)
+    const villaPositions = [
+        { x: -12, z: 25 }, { x: 12, z: 25 },
+        { x: -12, z: 38 }, { x: 12, z: 38 }
+    ];
+
+    villaPositions.forEach(pos => {
+        // Main Modern Villa Body
+        createBox(10, 5, 8, concreteMat, pos.x, 0, pos.z);
+        createBox(8, 4, 8.2, glassMat, pos.x, 0.5, pos.z);
+        createBox(6, 3, 6, woodMat, pos.x, 5, pos.z); // Upper wood level
+        // Swimming Pool
+        const pool = new THREE.Mesh(new THREE.BoxGeometry(6, 0.2, 4), glassMat);
+        pool.position.set(pos.x, 0.1, pos.z - 6);
+        mainGroup.add(pool);
+    });
+
+
+    window.selectBuilding = function(key) {
+        if (!projectsData[key]) return;
+
+        activeBuilding = key;
+        const data = projectsData[key];
+
+        // Update UI card highlight
+        document.querySelectorAll('.project-card').forEach(card => card.classList.remove('active'));
+        const activeCard = document.getElementById(`card-${key}`);
+        if (activeCard) activeCard.classList.add('active');
+
+        // Update Info Panel content
+        document.getElementById('proj-title').innerText = data.title;
+        document.getElementById('proj-category').innerText = data.category;
+        document.getElementById('proj-desc').innerText = data.desc;
+        document.getElementById('spec-floors').innerText = data.floors;
+        document.getElementById('spec-area').innerText = data.area;
+        document.getElementById('spec-status').innerText = data.status;
+
+        // Set Target Camera position
+        targetCameraPos = { ...data.cameraPos };
+        targetLookAt = { ...data.lookAt };
+    };
+
+    // Mouse Interaction for parallax camera tilt
+    document.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+        mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+    });
+
+    // Window Resize Handler
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Main Render Loop
+    const clock = new THREE.Clock();
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        const time = clock.getElapsedTime();
+
+        // Smooth camera lerp movement
+        camera.position.x += (targetCameraPos.x + mouseX * 2 - camera.position.x) * 0.04;
+        camera.position.y += (targetCameraPos.y + mouseY * 1 - camera.position.y) * 0.04;
+        camera.position.z += (targetCameraPos.z - camera.position.z) * 0.04;
+
+        currentLookAt.x += (targetLookAt.x - currentLookAt.x) * 0.05;
+        currentLookAt.y += (targetLookAt.y - currentLookAt.y) * 0.05;
+        currentLookAt.z += (targetLookAt.z - currentLookAt.z) * 0.05;
+
+        camera.lookAt(currentLookAt.x, currentLookAt.y, currentLookAt.z);
+
+        // Gentle subtle rotation for dynamic feel
+        spire.rotation.y = time * 0.5;
+
+        renderer.render(scene, camera);
+    }
+
+    // Hide loader and start
+    window.onload = () => {
+        setTimeout(() => {
+            const loader = document.getElementById('loading');
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+                animate();
+            }, 800);
+        }, 1200);
+    };
+</script>
+</body>
+</html>
